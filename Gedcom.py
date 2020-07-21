@@ -1,9 +1,15 @@
-from sys import exit
-from gedcom.element.individual import IndividualElement
+"""
+Parses a Gedcom file (.ged),
+extracts the full name of each member of the family tree,
+and puts the names in an excel sheet.
+
+Created on 27/04/2020 9:47 PM
+@author: Abdullah Alhashim (a.hashim)
+"""
+
 from gedcom.parser import Parser
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
-import csv
 
 
 class GedcomManipulator:
@@ -38,17 +44,13 @@ class GedcomManipulator:
         pointer = [el.get_pointer() for el in self.root_child_elements[1:2260]]
         wb = Workbook()
         ws = wb.active
-        # with open('/Users/abdullahalhashim/Desktop/Des/Family Tree/Python/FamNames.csv', mode='w') as names_files:
-        #   name_writer = csv.writer(names_files, delimiter=',')
         row = 2
         for el in self.root_child_elements[1:]:
             if el.get_tag() == 'FAM':  # if element tag is "Individual," extract full name.
                 for child in el.get_child_elements():
                     element = self.root_child_elements[pointer.index(child.get_value())+1]
                     full_name = self.get_full_name(element)
-                    # print(full_name)
                     if child.get_tag() != 'CHIL':
-                        # name_writer.writerow(full_name[::-1])
                         for col, val in enumerate(full_name[::-1], start=1):
                             cell = ws.cell(row=row, column=col+1)
                             cell.value = val
@@ -58,13 +60,11 @@ class GedcomManipulator:
                                 cell.fill = PatternFill("solid", fgColor="FFCCFF")
                         row += 1
                     else:
-                        # name_writer.writerow([self.first_name(element)])
                         cell = ws.cell(row=row, column=2)
                         cell.value = self.first_name(element)
                         cell.fill = PatternFill("solid", fgColor="00CCCC")
                         row += 1
                 row += 1
-                # name_writer.writerow('\n')
             else:  # else terminate, i.e. if tag is "family"
                 pass
         wb.save(output_file_path)
